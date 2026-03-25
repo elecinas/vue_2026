@@ -1,12 +1,14 @@
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
+import EstherComponent from './components/EstherComponent.vue';
+import gorillaUrl from './assets/gorilla.svg';
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
+    <!-- <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" /> -->
+    <EstherComponent alt_str="Avatar" :source=gorillaUrl  :size_nm="200" />
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
     </div>
