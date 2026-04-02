@@ -124,7 +124,7 @@ export default {
         </div>
         <div class="filter__field">
             <label for="popularity" class="filter__label">Popularity:</label>
-            <input v-model="addedPopularity" type="range" id="popularity" name="popularity" min="0" max="100" class="filter__range">
+            <input v-model="addedPopularity" type="range" id="popularity" name="popularity" min="0" max="5" class="filter__range">
             <span class="filter__range-value">{{ addedPopularity }}</span>
         </div>
     </div>
