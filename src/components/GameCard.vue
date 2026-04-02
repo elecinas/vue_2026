@@ -126,25 +126,23 @@ export default {
 }
 
 /** ESTILOS AÑADIDOS A LA PAC */
-.card__changes{
+/* .card__changes{
     max-width: 350px;
-    /* height: auto;
-    grid-template-rows: 160px auto; */
-}
+} */
 
 .card__title__changes{
     margin: 0;
 }
 
-.card__image__container{
+/* .card__image__container{
     width: 100%;
     height: 100%;
-}
+} */
 
-.card__image__changes{
+/* .card__image__changes{
     width: 100%;
     height: 100%;
-}
+} */
 
 .card__genre-item{
     background-color: var(--blue);
