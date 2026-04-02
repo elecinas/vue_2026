@@ -2,8 +2,11 @@
 export default {
     name: "FilterBar",
     data() {
-        //TODO: v-model
         return {
+            selectedSort: 'popularity',
+            selectedOrder: 'asc',
+            selectedGenre: 'all',
+            addedPopularity: 0,
             sortOptions: [
                 {
                     id: 'sort-1',
@@ -34,6 +37,10 @@ export default {
                 }],
             genreOptions: [
                 {
+                    id: 'genre-all',
+                    label: 'All',
+                    value: 'all',
+                }, {
                     id: 'genre-01',
                     label: 'Shooter',
                     value: 'shooter',
@@ -84,24 +91,42 @@ export default {
                     value: 'simulation',
                 }
             ],
-            popularity: 5,
         }
     }
 }
 </script>
 
 <template>
-    <div class="filter__field">
-        <label for="sort" class="filter__label">Elige una opción:</label>
-        <select name="sort-selection" id="sort" class="filter__select">
-            <option 
-                v-for="option in sortOptions" 
-                :key="option.id" 
-                :value="option.value"
-            >
-                {{ option.label }}
-            </option>
-        </select>
+    <div class="filter">
+        <div class="filter__field">
+            <label for="sort" class="filter__label">Sort By:</label>
+            <select v-model="selectedSort" name="sort-selection" id="sort" class="filter__select">
+                <option v-for="option in sortOptions" :key="option.id" :value="option.value">
+                    {{ option.label }}
+                </option>
+            </select>
+        </div>
+        <div class="filter__field">
+            <label for="order" class="filter__label">Order By:</label>
+            <select v-model="selectedOrder" name="order-selection" id="order" class="filter__select">
+                <option v-for="option in orderByOptions" :key="option.id" :value="option.value">
+                    {{ option.label }}
+                </option>
+            </select>
+        </div>
+        <div class="filter__field">
+            <label for="genre" class="filter__label">Genre:</label>
+            <select v-model="selectedGenre" name="genre-selection" id="genre" class="filter__select">
+                <option v-for="option in genreOptions" :key="option.id" :value="option.value">
+                    {{ option.label }}
+                </option>
+            </select>
+        </div>
+        <div class="filter__field">
+            <label for="popularity" class="filter__label">Popularity:</label>
+            <input v-model="addedPopularity" type="range" id="popularity" name="popularity" min="0" max="100" class="filter__range">
+            <span class="filter__range-value">{{ addedPopularity }}</span>
+        </div>
     </div>
 </template>
 
