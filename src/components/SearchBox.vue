@@ -3,13 +3,7 @@ export default {
     name: "SearchBox",
     data() {
         return {
-            textBar: "Search games...",
-            textButton: "Search"
-        }
-    },
-    methods: {
-        search(){
-            console.log('busca!')
+            textBar: "Search games..."
         }
     }
 }
@@ -17,7 +11,6 @@ export default {
 
 <template>
     <input class="search-box" type="text" :placeholder="textBar">
-    <input type="submit" @click="search">
 </template>
 
 <style>
