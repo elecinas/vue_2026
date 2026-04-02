@@ -1,4 +1,5 @@
 <script setup>
+import Header from './components/MainHeader.vue';
 import CardList from './components/CardList.vue';
 import SearchBox from './components/SearchBox.vue';
 import FilterBar from './components/FilterBar.vue';
@@ -63,6 +64,7 @@ const games = [
 </script>
 
 <template>
+    <Header />
     <FilterBar />
     <SearchBox />
     <CardList :games=games />
