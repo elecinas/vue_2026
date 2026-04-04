@@ -14,7 +14,7 @@ const games = [
         platform: ['PS3', 'Windows'],
         developer: 'Blizzard Entertainment',
         release_date: '2023-10-04',
-        popularity: 10
+        popularity: 5
     },
     {
         id: 'card_2',
@@ -25,7 +25,7 @@ const games = [
         platform: ['PS3', 'Windows'],
         developer: 'Blizzard Entertainment',
         release_date: '2022-12-04',
-        popularity: 10
+        popularity: 3
     },
     {
         id: 'card_3',
@@ -36,7 +36,7 @@ const games = [
         platform: ['PS3', 'Windows'],
         developer: 'Blizzard Entertainment',
         release_date: '2022-10-04',
-        popularity: 10
+        popularity: 1
     },
     {
         id: 'card_4',
@@ -47,7 +47,7 @@ const games = [
         platform: ['PS3', 'Windows'],
         developer: 'Blizzard Entertainment',
         release_date: '2025-10-04',
-        popularity: 10
+        popularity: 4
     },
     {
         id: 'card_5',
@@ -58,9 +58,14 @@ const games = [
         platform: ['PS3', 'Windows'],
         developer: 'Blizzard Entertainment',
         release_date: '2020-10-04',
-        popularity: 10
+        popularity: 5
     }
 ]
+
+const resetFilters = () => {
+    //TODO
+    console.log('Reseteará filtros')
+}
 </script>
 
 <template>
@@ -68,7 +73,7 @@ const games = [
     <main class="main-grid container">
         <div class="main-grid__top search-button-container">
             <SearchBox />
-            <button class="button">Reset filters</button>
+            <button @click="resetFilters" class="button">Reset filters</button>
         </div>     
         <FilterBar class="main-grid__filterbar" />
         <CardList :games=games class="main-grid__cardlist" />

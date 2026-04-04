@@ -18,12 +18,15 @@ export default {
 </script>
 
 <template>
-    <div class="card-list">
-        <GameCard v-for="infoGame in games" :key="infoGame.id" :game="infoGame" />
-    </div>
+    <ul v-if="games.length > 0" class="card-list">
+        <li v-for="infoGame in games" :key="infoGame.id" >
+            <GameCard :game="infoGame" />
+        </li>
+    </ul>
+    <p v-else>No se han encontrado juegos que coincidan con la búsqueda</p>
 </template>
 
-<style>
+<style scoped>
 .card-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
