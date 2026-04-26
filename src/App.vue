@@ -4,6 +4,7 @@ import CardList from './components/CardList.vue';
 import SearchBox from './components/SearchBox.vue';
 import FilterBar from './components/FilterBar.vue';
 import DialogModal from './components/DialogModal.vue';
+import GameForm from './components/GameForm.vue';
 
 export default {
     name: 'App',
@@ -12,11 +13,13 @@ export default {
         SearchBox,
         FilterBar,
         CardList,
-        DialogModal
+        DialogModal,
+        GameForm
     },
     data() {
         return {
             isModalOpen: false,
+            selectedGame: null,
             games: [
                 {
                     id: 'card_1',
@@ -80,8 +83,33 @@ export default {
         resetFilters() {
             console.log('Reseteará filtros');
         },
-        toggleModal() {
-            this.isModalOpen = !this.isModalOpen;
+        closeModal() {
+            this.isModalOpen = false;
+            this.selectedGame = null;
+        },
+        add(game) {
+            this.games.push(game);
+            this.closeModal();
+        }, 
+        update(g) {
+            const gameIndex = this.games.findIndex((game) => game.id === g.id);
+            this.games.splice(gameIndex, 1, g);
+            this.closeModal();
+        },
+        remove(gameid = ""){
+            if(gameid && gameid !== ""){
+                const gameIndex = this.games.findIndex((game) => game.id === gameid)
+                this.games.splice(gameIndex, 1);
+            }
+            this.closeModal();
+        },
+        openModalWithGameInfo(eventGame){
+            this.selectedGame = {...eventGame};
+            this.isModalOpen = true;
+        },
+        openModalWithoutGameInfo(){
+            this.isModalOpen = true
+            this.selectedGame = null
         }
     }
 }
@@ -92,21 +120,31 @@ export default {
     <main class="main-grid container">
         <div class="main-grid__top">
             <SearchBox />
+            <!-- <p>{{ selectedGame }}</p> -->
             <div class="buttons-container">
                 <button @click="resetFilters" class="button">Reset filters</button>
-                <button @click="isModalOpen = true" class="button">New game</button>
-                <DialogModal v-if="isModalOpen" @close="isModalOpen = false">
+                <button @click="openModalWithoutGameInfo" class="button">New game</button>
+                <DialogModal v-if="isModalOpen" @close="closeModal">
                     <template v-slot:header>
-                        <h3>Afegir nou joc</h3>
+                        <h5 style="margin: 0;">{{ selectedGame?.title || "New Game" }}</h5>
                     </template>
                     <template v-slot:body>
-                        <p>Contingut del formulari</p>
+                        <GameForm 
+                            @add-game="add($event)" 
+                            @edit-game="update($event)" 
+                            @delete-game="remove($event)" 
+                            :current-game="selectedGame"
+                        />
                     </template>
                 </DialogModal>
             </div>
         </div>
         <FilterBar class="main-grid__filterbar" />
-        <CardList :games="games" class="main-grid__cardlist" />
+        <CardList  
+            class="main-grid__cardlist"
+            :games="games" 
+            @edit-game="openModalWithGameInfo($event)"
+        />
     </main>
 </template>
 

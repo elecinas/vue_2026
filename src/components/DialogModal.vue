@@ -6,17 +6,17 @@ export default {
 </script>
 <template>
     <Teleport to="#modal">
-        <div class="modal-overlay">
-        <div class="modal-content">
-            <header class="modal-header">
-                <slot name="header"></slot>
-                <span class="modal-close" @click="$emit('close')">&times;</span>
-            </header>
-            <div class="modal-body">
-                <slot name="body"></slot>
+        <div class="modal-overlay" @click.self="$emit('close')">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <slot name="header"></slot>
+                    <span class="modal-close" @click="$emit('close')">&times;</span>
+                </header>
+                <div class="modal-body">
+                    <slot name="body"></slot>
+                </div>
             </div>
         </div>
-    </div>
     </Teleport>
 </template>
 <style scoped>

@@ -1,25 +1,25 @@
 <script>
 export default {
   name: "GameCard",
-  data() {
-    return {};
-  },
   props: {
     game: {
       type: Object,
       required: true,
-      default: () => ({
-        id: "",
-        title: "",
-        thumbnail: "",
-        short_description: "",
-        genre: [],
-        platform: [],
-        developer: "",
-        release_date: null,
-        popularity: 0,
-      }),
     },
+  },
+  emits: ['select-game'],
+  methods: {
+    sendGame(selectedG) {
+      this.$emit('select-game', selectedG)
+    },
+    formatHuman(date) {
+      const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      };
+      return new Date(date).toLocaleDateString('en-US', options);
+    }
   },
   computed: {
     displayGenres() {
@@ -30,13 +30,9 @@ export default {
 </script>
 
 <template>
-  <div class="card card__changes">
+  <div class="card card__changes" @click="sendGame(game)">
     <div class="card__image__container">
-      <img
-        class="card__image card__image__changes"
-        :src="game.thumbnail"
-        :alt="game.title"
-      />
+      <img class="card__image card__image__changes" :src="game.thumbnail" :alt="game.title" loading="lazy"/>
     </div>
 
     <div class="card__content">
@@ -46,15 +42,11 @@ export default {
       <p class="card__description">{{ game.short_description }}</p>
       <footer class="card__footer">
         <ul class="card__genres">
-          <li
-            class="card__genre-item"
-            v-for="(gen, index) in displayGenres"
-            :key="index"
-          >
+          <li class="card__genre-item" v-for="(gen, index) in displayGenres" :key="index">
             {{ gen }}
           </li>
         </ul>
-        <p class="card__badge card__badge_changes">{{ game.release_date }}</p>
+        <p class="card__badge card__badge_changes">{{ formatHuman(game.release_date) }}</p>
       </footer>
     </div>
   </div>
