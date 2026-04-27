@@ -1,16 +1,12 @@
 <script>
 export default {
     name: "SearchBox",
-    data() {
-        return {
-            searchQuery: "",
-         }
-    }
+    emits: ['search']
 }
 </script>
 
 <template>
-    <input v-model="searchQuery" aria-label="Search games" class="search-box" type="text" placeholder="Search games...">
+    <input @input="$emit('search', $event.target.value)" aria-label="Search games" class="search-box" type="text" placeholder="Search games...">
 </template>
 
 <style scoped>
