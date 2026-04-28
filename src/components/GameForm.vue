@@ -24,19 +24,13 @@ export default {
         },
     },
     mounted() {
-        this.game = this.currentGame ? { ...this.currentGame } : {
-                id: "",
-                title: "",
-                thumbnail: "",
-                short_description: "",
-                genre: "",
-                platform: "",
-                developer: "",
-                release_date: null,
-                popularity: 0,
-            };
-        this.game.genre.length > 0 && (this.game.genre = this.currentGame.genre.join(','))
-        this.game.platform.length > 0 && (this.game.platform = this.currentGame.platform.join(','))
+        const baseGame = { ...this.currentGame };
+
+        this.game = {
+            ...baseGame,
+            genre: Array.isArray(baseGame.genre) ? baseGame.genre.join(', ') : "",
+            platform: Array.isArray(baseGame.platform) ? baseGame.platform.join(', ') : ""
+        };
     },
     emits: ['add-game', 'edit-game', 'delete-game'],
     methods: {
@@ -49,6 +43,7 @@ export default {
             };
 
             this.$emit('add-game', gameToSend);
+            this.resetForm();
         },
         updateGame() {
             const gameToSend = {
@@ -56,7 +51,8 @@ export default {
                 genre: this.stringToArray(this.game.genre),
                 platform: this.stringToArray(this.game.platform)
             };
-            this.$emit('edit-game', gameToSend)
+            this.$emit('edit-game', gameToSend);
+            this.resetForm();
         },
         deleteGame() {
             this.$emit('delete-game', this.game.id)
@@ -65,22 +61,47 @@ export default {
             return array.join(',')
         },
         stringToArray(string) {
-            return (typeof string === 'string') ? string.split(',').map(s => s?.trim()) : []
+            if (typeof string !== 'string' || !string.trim()) return [];
+
+            return string
+                .split(',')
+                .map(item => item.trim())
+                .filter(item => item !== "");
         },
         validate(type) {
             //todos excepto plataforma y desarrollador
             this.errors = [];
-            if (!this.game.title) this.errors.push('Please input title');
-            if (!this.game.short_description) this.errors.push('Please input short description');
-            if (!this.game.thumbnail) this.errors.push('Please input thumbnail URL');
+
+            //validacion texto simple
+            if (!this.game.title?.trim()) this.errors.push('Please input title');
+            if (!this.game.short_description?.trim()) this.errors.push('Please input short description');
+            if (!this.game.thumbnail?.trim()) this.errors.push('Please input thumbnail URL');
             if (!this.game.release_date) this.errors.push('Please input release date');
-            if (!this.game.genre?.trim()) this.errors.push('Please input genre');
+
+            //Validacion campos con conversiones (genre y platform)
+            const genreArray = this.stringToArray(this.game.genre);
+            if (genreArray.length === 0) this.errors.push('Please input genre')
+
             //Si hay errores, no se añade
             if (this.errors.length > 0) return;
             //Si no hay errores, se añade
             if (type === 'add') this.addGame();
             else this.updateGame();
-        }
+        },
+        resetForm() {
+            this.game = {
+                id: "",
+                title: "",
+                thumbnail: "",
+                short_description: "",
+                genre: "",
+                platform: "",
+                developer: "",
+                release_date: null,
+                popularity: 0,
+            },
+            this.errors = [];
+        },
     },
     computed: {},
 };
@@ -105,26 +126,32 @@ export default {
                 </div>
                 <div class="game-form__group">
                     <label for="thumbnail-url" class="game-form__label">Thumbnail URL</label>
-                    <input type="text" id="thumbnail-url" class="game-form__input" v-model="game.thumbnail" placeholder="http://www...">
+                    <input type="text" id="thumbnail-url" class="game-form__input" v-model="game.thumbnail"
+                        placeholder="http://www...">
                     <label for="developer" class="game-form__label">Developer</label>
-                    <input type="text" id="developer" class="game-form__input" v-model="game.developer" placeholder="Developer name">
+                    <input type="text" id="developer" class="game-form__input" v-model="game.developer"
+                        placeholder="Developer name">
                 </div>
                 <div class="game-form__group">
                     <label for="release" class="game-form__label">Release date</label>
                     <input type="date" id="release" class="game-form__input" v-model="game.release_date"
                         min="1950-01-01" max="2026-12-31">
                     <label for="platforms" class="game-form__label">Platforms</label>
-                    <input type="text" id="platforms" class="game-form__input" v-model="game.platform" placeholder="Windows, Playstation">
+                    <input type="text" id="platforms" class="game-form__input" v-model="game.platform"
+                        placeholder="Windows, Playstation">
                 </div>
                 <div class="game-form__group">
                     <label for="genres" class="game-form__label">Genres</label>
-                    <input type="text" id="genres" class="game-form__input" v-model="game.genre" placeholder="Action, Terror">
+                    <input type="text" id="genres" class="game-form__input" v-model="game.genre"
+                        placeholder="Action, Terror">
                     <label for="popularity" class="game-form__label">Popularity</label>
-                    <input type="range" id="popularity" name="popularity" min="0" max="5" class="fame-form__input" v-model.number="game.popularity">
+                    <input type="range" id="popularity" name="popularity" min="0" max="5" class="fame-form__input"
+                        v-model.number="game.popularity">
                 </div>
                 <div class="game-form__actions">
                     <button class="button" @click.prevent="validate(currentGame?.id ? 'update' : 'add')">Save</button>
-                    <button class="button game-form__btn--cancel" @click.prevent="deleteGame">{{ game?.id ? 'Delete' : 'Cancel'}}</button>
+                    <button class="button game-form__btn--cancel" @click.prevent="deleteGame">{{ game?.id ? 'Delete' :
+                        'Cancel' }}</button>
                 </div>
             </div>
         </form>
