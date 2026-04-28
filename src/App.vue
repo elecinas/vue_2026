@@ -5,6 +5,7 @@ import SearchBox from './components/SearchBox.vue';
 import FilterBar from './components/FilterBar.vue';
 import DialogModal from './components/DialogModal.vue';
 import GameForm from './components/GameForm.vue';
+import { GAMES_DATA } from './data/games';
 
 export default {
     name: 'App',
@@ -20,63 +21,7 @@ export default {
         return {
             isModalOpen: false,
             selectedGame: null,
-            games: [
-                {
-                    id: 'card_1',
-                    title: 'OverWatch',
-                    thumbnail: 'https://static0.thegamerimages.com/wordpress/wp-content/uploads/2019/07/Tracer-overwatch-little-known-facts-featured-image.jpg',
-                    short_description: 'A hero-focused first-person team shooter from Blizzard Entertainment',
-                    genre: ['shooter'],
-                    platform: ['PS3', 'Windows'],
-                    developer: 'Blizzard Entertainment',
-                    release_date: '2023-10-04',
-                    popularity: 5
-                },
-                {
-                    id: 'card_2',
-                    title: 'Mass Effect',
-                    thumbnail: 'https://imagenes.hobbyconsolas.com/files/image_1920_1080/uploads/imagenes/2025/11/13/6915a431a031b.jpeg',
-                    short_description: 'A hero-focused first-person team shooter from Blizzard Entertainment. A hero-focused first-person team shooter from Blizzard Entertainment',
-                    genre: ['shooter'],
-                    platform: ['PS3', 'Windows'],
-                    developer: 'Blizzard Entertainment',
-                    release_date: '2022-12-04',
-                    popularity: 3
-                },
-                {
-                    id: 'card_3',
-                    title: 'The last of us',
-                    thumbnail: 'https://image.api.playstation.com/vulcan/ap/rnd/202311/1717/c988b0cc253d9f3de0b5dedb9416795a8dae1ee67d179f3d.png',
-                    short_description: 'A hero-focused first-person team shooter from Blizzard Entertainment',
-                    genre: ['puzzle'],
-                    platform: ['PS3', 'Windows'],
-                    developer: 'Blizzard Entertainment',
-                    release_date: '2022-10-04',
-                    popularity: 1
-                },
-                {
-                    id: 'card_4',
-                    title: "Assassin's creed",
-                    thumbnail: 'https://media.vandal.net/i/1280x720/10-2023/17/202310171411091_4.jpg',
-                    short_description: 'A hero-focused first-person team shooter from Blizzard Entertainment',
-                    genre: ['shooter', 'platform', 'fighting'],
-                    platform: ['PS3', 'Windows'],
-                    developer: 'Blizzard Entertainment',
-                    release_date: '2025-10-04',
-                    popularity: 4
-                },
-                {
-                    id: 'card_5',
-                    title: 'God of war',
-                    thumbnail: 'https://assetsio.gnwcdn.com/god-war-ragnarok-2799417.png',
-                    short_description: 'A hero-focused first-person team shooter from Blizzard Entertainment. A hero-focused first-person team shooter from Blizzard Entertainment',
-                    genre: ['sports', 'rhythm'],
-                    platform: ['PS3', 'Windows'],
-                    developer: 'Blizzard Entertainment',
-                    release_date: '2020-10-04',
-                    popularity: 5
-                }
-            ],
+            games: GAMES_DATA,
             currentOrder: 'asc',
             currentSort: 'popularity',
             currentGenre: 'all',
@@ -88,7 +33,7 @@ export default {
         filteredGames() {
             return this.filterGames(this.currentSort, this.currentOrder, this.currentGenre, this.currentPopularity, this.currentSearch);
         },
-        genresContent(){
+        genresContent() {
             const setGenres = new Set(this.games.flatMap((g) => g.genre.map((name) => name.toLowerCase())))
             const arrayGenres = ['all', ...setGenres].sort();
             return arrayGenres
@@ -128,7 +73,7 @@ export default {
             this.currentSort = 'popularity'
             this.currentGenre = 'all'
             this.currentPopularity = 0,
-            this.currentSearch = ''
+                this.currentSearch = ''
         },
         filterGames(sortType, orderBy, genreName, popularity, searchContent) {
             //Modificador que determina ascendente o descendente
@@ -156,7 +101,7 @@ export default {
             //Filtro de popularidad
             arr = arr.filter((game) => game.popularity >= popularity)
             //Filtro de búsqueda
-            if(searchContent) arr = arr.filter((game) => this.filterSearchCondition(game, searchContent))
+            if (searchContent) arr = arr.filter((game) => this.filterSearchCondition(game, searchContent))
 
             return arr;
         },
@@ -195,17 +140,10 @@ export default {
                 </DialogModal>
             </div>
         </div>
-        <FilterBar 
-            class="main-grid__filterbar" 
-            :current-order="currentOrder" 
-            :current-genre="currentGenre"
-            :current-sort="currentSort" 
-            :current-popularity="currentPopularity" 
-            :all-genres="genresContent"
-            @select-sort="currentSort = $event"
-            @select-order="currentOrder = $event" 
-            @select-genre="currentGenre = $event"
-            @select-popularity="currentPopularity = $event" />
+        <FilterBar class="main-grid__filterbar" :current-order="currentOrder" :current-genre="currentGenre"
+            :current-sort="currentSort" :current-popularity="currentPopularity" :all-genres="genresContent"
+            @select-sort="currentSort = $event" @select-order="currentOrder = $event"
+            @select-genre="currentGenre = $event" @select-popularity="currentPopularity = $event" />
         <CardList class="main-grid__cardlist" :games="filteredGames" @edit-game="openModalWithGameInfo($event)" />
     </main>
 </template>
@@ -245,5 +183,10 @@ export default {
 
 .buttons-container button {
     height: 100%;
+}
+
+/**Estilos añadidos */
+.main-grid{
+    margin-bottom: 5rem;
 }
 </style>

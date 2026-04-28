@@ -1,94 +1,11 @@
 <script>
-const OPTIONS = {
-    sortOptions: [
-        {
-            id: 'sort-1',
-            label: 'Alphabetical',
-            value: 'alphabetical',
-        },
-        {
-            id: 'sort-2',
-            label: 'Release date',
-            value: 'release',
-        },
-        {
-            id: 'sort-3',
-            label: 'Popularity',
-            value: 'popularity'
-        }
-    ],
-    orderByOptions: [
-        {
-            id: 'order-1',
-            label: 'Ascending',
-            value: 'asc',
-        },
-        {
-            id: 'order-2',
-            label: 'Descending',
-            value: 'desc',
-        }],
-    genreOptions: [
-        {
-            id: 'genre-all',
-            label: 'All',
-            value: 'all',
-        }, {
-            id: 'genre-01',
-            label: 'Shooter',
-            value: 'shooter',
-        },
-        {
-            id: 'genre-02',
-            label: 'Platform',
-            value: 'platform',
-        },
-        {
-            id: 'genre-03',
-            label: 'Fighting',
-            value: 'fighting',
-        },
-        {
-            id: 'genre-04',
-            label: 'Sports',
-            value: 'sports',
-        },
-        {
-            id: 'genre-05',
-            label: 'Strategy',
-            value: 'strategy',
-        },
-        {
-            id: 'genre-06',
-            label: 'Rhythm',
-            value: 'rhythm',
-        },
-        {
-            id: 'genre-07',
-            label: 'Adventure',
-            value: 'adventure',
-        },
-        {
-            id: 'genre-08',
-            label: 'Puzzle',
-            value: 'puzzle',
-        },
-        {
-            id: 'genre-091',
-            label: 'Role-playing',
-            value: 'rolePlaying',
-        },
-        {
-            id: 'genre-10',
-            label: 'Simulation',
-            value: 'simulation',
-        }
-    ],
-}
+import { SORT_OPTIONS, ORDER_OPTIONS } from '@/data/filterOptions';
+
 export default {
     name: "FilterBar",
     created(){
-        this.OPTIONS = OPTIONS
+        this.SORT_OPTIONS = SORT_OPTIONS,
+        this.ORDER_OPTIONS = ORDER_OPTIONS
     },
     props: {
         currentSort: String,
@@ -106,7 +23,7 @@ export default {
         <div class="filter__field">
             <label for="sort" class="filter__label">Sort By:</label>
             <select :value="currentSort" @change="$emit('select-sort', $event.target.value)"name="sort-selection" id="sort" class="filter__select">
-                <option v-for="option in OPTIONS.sortOptions" :key="option.id" :value="option.value">
+                <option v-for="option in SORT_OPTIONS" :key="option.id" :value="option.value">
                     {{ option.label }}
                 </option>
             </select>
@@ -114,7 +31,7 @@ export default {
         <div class="filter__field">
             <label for="order" class="filter__label">Order By:</label>
             <select :value="currentOrder" @change="$emit('select-order', $event.target.value)" name="order-selection" id="order" class="filter__select">
-                <option v-for="option in OPTIONS.orderByOptions" :key="option.id" :value="option.value">
+                <option v-for="option in ORDER_OPTIONS" :key="option.id" :value="option.value">
                     {{ option.label }}
                 </option>
             </select>
