@@ -94,14 +94,14 @@ export default {
             this.errors = [];
         },
         deleteGame() {
-    if (this.game?.id) {
-        if (confirm('Are you sure you want to delete this game?')) {
-            this.$emit('delete-game', this.game.id);
-        }
-    } else {
-        this.$emit('delete-game');
-    }
-},
+            if (this.game?.id) {
+                if (confirm('Are you sure you want to delete this game?')) {
+                    this.$emit('delete-game', this.game.id);
+                }
+            } else {
+                this.$emit('delete-game');
+            }
+        },
     },
     computed: {
         displayImage() {
@@ -153,7 +153,8 @@ export default {
                 </div>
                 <div class="game-form__actions">
                     <button class="button" @click.prevent="save">Save</button>
-                    <button class="button game-form__btn--cancel" @click.prevent="deleteGame">{{ currentGame?.id ? 'Delete' : 'Cancel' }}</button>
+                    <button class="button game-form__btn--cancel" @click.prevent="deleteGame">{{ currentGame?.id ?
+                        'Delete' : 'Cancel' }}</button>
                 </div>
             </div>
         </form>
