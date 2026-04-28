@@ -6,9 +6,6 @@ export default {
     components: {
         GameCard
     },
-    data(){
-        return {}
-    },
     props: {
         games: {
             type: Array,

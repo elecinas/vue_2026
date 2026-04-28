@@ -10,83 +10,74 @@ export default {
     props: {
         currentGame: {
             type: Object,
-            default: () => ({
-                id: "",
-                title: "",
-                thumbnail: "",
-                short_description: "",
-                genre: [],
-                platform: [],
-                developer: "",
-                release_date: null,
-                popularity: 0,
-            }),
+            default: null
         },
     },
-    mounted() {
-        const baseGame = { ...this.currentGame };
+    // watch para que el estado de la información del juego
+    // en el  formulario esté sincronizado siempre con el padre (App)
+    watch: {
+        currentGame: {
+            handler(newVal) {
+                const baseGame = newVal ? { ...newVal } : {};
 
-        this.game = {
-            ...baseGame,
-            genre: Array.isArray(baseGame.genre) ? baseGame.genre.join(', ') : "",
-            platform: Array.isArray(baseGame.platform) ? baseGame.platform.join(', ') : ""
-        };
+                this.game = {
+                    ...baseGame,
+                    title: baseGame.title || "",
+                    short_description: baseGame.short_description || "",
+                    thumbnail: baseGame.thumbnail || "",
+                    developer: baseGame.developer || "",
+                    release_date: baseGame.release_date || null,
+                    popularity: baseGame.popularity || 0,
+                    genre: Array.isArray(baseGame.genre) ? baseGame.genre.join(', ') : "",
+                    platform: Array.isArray(baseGame.platform) ? baseGame.platform.join(', ') : ""
+                };
+            },
+            //como watch solo se activa cuando la variable de la que depende cambia
+            // inmediate: true obliga a ejecutar la funcion al crear el componente
+            immediate: true
+        }
     },
     emits: ['add-game', 'edit-game', 'delete-game'],
     methods: {
-        addGame() {
-            const gameToSend = {
-                ...this.game,
-                id: window.crypto.randomUUID(),
-                genre: this.stringToArray(this.game.genre),
-                platform: this.stringToArray(this.game.platform)
-            };
-
-            this.$emit('add-game', gameToSend);
-            this.resetForm();
-        },
-        updateGame() {
-            const gameToSend = {
-                ...this.game,
-                genre: this.stringToArray(this.game.genre),
-                platform: this.stringToArray(this.game.platform)
-            };
-            this.$emit('edit-game', gameToSend);
-            this.resetForm();
-        },
-        deleteGame() {
-            this.$emit('delete-game', this.game.id)
-        },
         arrayToString(array) {
             return array.join(',')
         },
-        stringToArray(string) {
-            if (typeof string !== 'string' || !string.trim()) return [];
-
-            return string
-                .split(',')
-                .map(item => item.trim())
-                .filter(item => item !== "");
+        stringToArray(str) {
+            if (typeof str !== 'string' || !str.trim()) return [];
+            return str.split(',').map(item => item.trim()).filter(item => item !== "");
         },
-        validate(type) {
-            //todos excepto plataforma y desarrollador
+        prepareGameData() {
+            return {
+                ...this.game,
+                genre: this.stringToArray(this.game.genre),
+                platform: this.stringToArray(this.game.platform)
+            };
+        },
+        save() {
             this.errors = [];
 
-            //validacion texto simple
+            // Validaciones
             if (!this.game.title?.trim()) this.errors.push('Please input title');
             if (!this.game.short_description?.trim()) this.errors.push('Please input short description');
             if (!this.game.thumbnail?.trim()) this.errors.push('Please input thumbnail URL');
             if (!this.game.release_date) this.errors.push('Please input release date');
 
-            //Validacion campos con conversiones (genre y platform)
             const genreArray = this.stringToArray(this.game.genre);
-            if (genreArray.length === 0) this.errors.push('Please input genre')
+            if (genreArray.length === 0) this.errors.push('Please input at least one genre');
 
-            //Si hay errores, no se añade
+            // Si errores se sale
             if (this.errors.length > 0) return;
-            //Si no hay errores, se añade
-            if (type === 'add') this.addGame();
-            else this.updateGame();
+
+            const finalData = this.prepareGameData();
+
+            if (this.currentGame?.id) {
+                this.$emit('edit-game', finalData);
+            } else {
+                finalData.id = window.crypto.randomUUID();
+                this.$emit('add-game', finalData);
+            }
+
+            this.resetForm();
         },
         resetForm() {
             this.game = {
@@ -99,19 +90,31 @@ export default {
                 developer: "",
                 release_date: null,
                 popularity: 0,
-            },
+            };
             this.errors = [];
         },
+        deleteGame() {
+    if (this.game?.id) {
+        if (confirm('Are you sure you want to delete this game?')) {
+            this.$emit('delete-game', this.game.id);
+        }
+    } else {
+        this.$emit('delete-game');
+    }
+},
     },
-    computed: {},
+    computed: {
+        displayImage() {
+            const DEFAULT_IMAGE = 'https://gaming-cdn.com/images/products/13386/orig/hogwarts-legacy-deluxe-edition-deluxe-edition-xbox-series-x-s-xbox-one-juego-microsoft-store-cover.jpg'
+            return this.game.thumbnail ? this.game.thumbnail : DEFAULT_IMAGE
+        }
+    },
 };
 </script>
 
 <template>
     <div class="game-form">
-        <img class="game-form__image"
-            :src="game.thumbnail ? game.thumbnail : 'https://gaming-cdn.com/images/products/13386/orig/hogwarts-legacy-deluxe-edition-deluxe-edition-xbox-series-x-s-xbox-one-juego-microsoft-store-cover.jpg'"
-            alt="">
+        <img class="game-form__image" :src="displayImage" alt="Game thumbnail">
         <ul v-if="errors.length > 0" class="game-form__error">
             <li v-for="error in errors" :key="error">{{ error }}</li>
         </ul>
@@ -145,13 +148,12 @@ export default {
                     <input type="text" id="genres" class="game-form__input" v-model="game.genre"
                         placeholder="Action, Terror">
                     <label for="popularity" class="game-form__label">Popularity</label>
-                    <input type="range" id="popularity" name="popularity" min="0" max="5" class="fame-form__input"
+                    <input type="range" id="popularity" name="popularity" min="0" max="5" class="game-form__input"
                         v-model.number="game.popularity">
                 </div>
                 <div class="game-form__actions">
-                    <button class="button" @click.prevent="validate(currentGame?.id ? 'update' : 'add')">Save</button>
-                    <button class="button game-form__btn--cancel" @click.prevent="deleteGame">{{ game?.id ? 'Delete' :
-                        'Cancel' }}</button>
+                    <button class="button" @click.prevent="save">Save</button>
+                    <button class="button game-form__btn--cancel" @click.prevent="deleteGame">{{ currentGame?.id ? 'Delete' : 'Cancel' }}</button>
                 </div>
             </div>
         </form>

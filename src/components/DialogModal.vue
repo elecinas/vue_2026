@@ -1,22 +1,35 @@
 <script>
 export default {
     name: 'DialogModal',
-    emits: ['close']
+    emits: ['close'],
+    mounted(){
+        document.body.style.overflow = 'hidden';
+        window.addEventListener('keydown', this.handleEsc);
+    },
+    unmounted(){
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', this.handleEsc);
+    },
+    methods: {
+        handleEsc(e){
+            if(e.key === 'Escape') this.$emit('close');
+        }
+    }
 }
 </script>
 <template>
     <Teleport to="#modal">
-        <div class="modal-overlay" @click.self="$emit('close')">
+        <dialog class="modal-overlay" @click.self="$emit('close')">
             <div class="modal-content">
                 <header class="modal-header">
                     <slot name="header"></slot>
-                    <span class="modal-close" @click="$emit('close')">&times;</span>
+                    <button class="modal-close" @click="$emit('close')" aria-label="Close modal">&times;</button>
                 </header>
                 <div class="modal-body">
                     <slot name="body"></slot>
                 </div>
             </div>
-        </div>
+        </dialog>
     </Teleport>
 </template>
 <style scoped>
@@ -82,5 +95,14 @@ export default {
 
 .modal-close:hover {
     color: var(--blue);
+}
+
+/**Estilos añadidos */
+.modal-overlay {
+    width: 100vw;
+    height: 100vh;
+    border: none;
+    padding: 0;
+    margin: 0;
 }
 </style>

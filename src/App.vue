@@ -30,13 +30,36 @@ export default {
         }
     },
     computed: {
-        filteredGames() {
-            return this.filterGames(this.currentSort, this.currentOrder, this.currentGenre, this.currentPopularity, this.currentSearch);
-        },
         genresContent() {
-            const setGenres = new Set(this.games.flatMap((g) => g.genre.map((name) => name.toLowerCase())))
-            const arrayGenres = ['all', ...setGenres].sort();
-            return arrayGenres
+            const rawGenres = this.games.flatMap(game => game.genre.map(name => name.trim().toLowerCase()));
+            const uniqueGenres = [...new Set(rawGenres)].sort();
+
+            return ['all', ...uniqueGenres]
+        },
+        filteredGames() {
+            let result = [...this.games];
+
+            //filtrado de búsqueda
+            if (this.currentSearch) {
+                result = result.filter(game => this.filterSearchCondition(game, this.currentSearch));
+            }
+            //filtrado de genero
+            if (this.currentGenre !== 'all') {
+                result = result.filter(game => game.genre.includes(this.currentGenre.toLowerCase()));
+            }
+            //filtrado de popularidad
+            result = result.filter(game => game.popularity >= this.currentPopularity);
+            //ordenacion
+            const modifier = this.currentOrder === 'asc' ? 1 : -1;
+
+            result.sort((a, b) => {
+                if (this.currentSort === 'alphabetical') return a.title.localeCompare(b.title) * modifier;
+                if (this.currentSort === 'release') return a.release_date.localeCompare(b.release_date) * modifier;
+                if (this.currentSort === 'popularity') return (a.popularity - b.popularity) * modifier;
+                return 0;
+            });
+
+            return result;
         }
     },
     methods: {
@@ -45,19 +68,15 @@ export default {
             this.selectedGame = null;
         },
         add(game) {
-            this.games.push(game);
+            this.games = [...this.games, game];
             this.closeModal();
         },
-        update(game) {
-            const gameIndex = this.games.findIndex((g) => g.id === game.id);
-            this.games.splice(gameIndex, 1, game);
+        update(updatedGame) {
+            this.games = this.games.map(g => g.id === updatedGame.id ? updatedGame : g);
             this.closeModal();
         },
-        remove(gameid = "") {
-            if (gameid) {
-                const gameIndex = this.games.findIndex((game) => game.id === gameid)
-                this.games.splice(gameIndex, 1);
-            }
+        remove(gameid) {
+            this.games = this.games.filter(g => g.id !== gameid);
             this.closeModal();
         },
         openModalWithGameInfo(eventGame) {
@@ -74,36 +93,6 @@ export default {
             this.currentGenre = 'all'
             this.currentPopularity = 0,
                 this.currentSearch = ''
-        },
-        filterGames(sortType, orderBy, genreName, popularity, searchContent) {
-            //Modificador que determina ascendente o descendente
-            const modifier = orderBy === 'asc' ? 1 : -1
-            //copia del array
-            let arr = [...this.games];
-            //Filtra según tipo y orden
-            switch (sortType) {
-                case 'alphabetical':
-                    arr = arr.sort((gameA, gameB) => (gameA.title.localeCompare(gameB.title)) * modifier)
-                    break;
-                case 'release':
-                    arr = arr.sort((gameA, gameB) => (gameA.release_date.localeCompare(gameB.release_date)) * modifier)
-                    break;
-                case 'popularity':
-                    arr = arr.sort((gameA, gameB) => (gameA.popularity - gameB.popularity) * modifier)
-                    break;
-                default:
-                    break;
-            }
-            //Filtrado de Género
-            if (genreName !== 'all') {
-                arr = arr.filter(game => game.genre.includes(genreName.toLowerCase()));
-            }
-            //Filtro de popularidad
-            arr = arr.filter((game) => game.popularity >= popularity)
-            //Filtro de búsqueda
-            if (searchContent) arr = arr.filter((game) => this.filterSearchCondition(game, searchContent))
-
-            return arr;
         },
         filterSearchCondition(game, searchContent) {
             const str = searchContent.toLowerCase();
@@ -125,7 +114,6 @@ export default {
     <main class="main-grid container">
         <div class="main-grid__top">
             <SearchBox @search="currentSearch = $event" />
-            <!-- <p>{{ selectedGame }}</p> -->
             <div class="buttons-container">
                 <button @click="resetFilters" class="button">Reset filters</button>
                 <button @click="openModalWithoutGameInfo" class="button">New game</button>
@@ -134,17 +122,30 @@ export default {
                         <h5 style="margin: 0;">{{ selectedGame?.title || "New Game" }}</h5>
                     </template>
                     <template v-slot:body>
-                        <GameForm @add-game="add($event)" @edit-game="update($event)" @delete-game="remove($event)"
+                        <GameForm 
+                            @add-game="add($event)" 
+                            @edit-game="update($event)" 
+                            @delete-game="remove($event)"
                             :current-game="selectedGame" />
                     </template>
                 </DialogModal>
             </div>
         </div>
-        <FilterBar class="main-grid__filterbar" :current-order="currentOrder" :current-genre="currentGenre"
-            :current-sort="currentSort" :current-popularity="currentPopularity" :all-genres="genresContent"
-            @select-sort="currentSort = $event" @select-order="currentOrder = $event"
-            @select-genre="currentGenre = $event" @select-popularity="currentPopularity = $event" />
-        <CardList class="main-grid__cardlist" :games="filteredGames" @edit-game="openModalWithGameInfo($event)" />
+        <FilterBar 
+            class="main-grid__filterbar" 
+            :current-order="currentOrder" 
+            :current-genre="currentGenre"
+            :current-sort="currentSort" 
+            :current-popularity="currentPopularity" 
+            :all-genres="genresContent"
+            @select-sort="currentSort = $event" 
+            @select-order="currentOrder = $event"
+            @select-genre="currentGenre = $event" 
+            @select-popularity="currentPopularity = $event" />
+        <CardList 
+            class="main-grid__cardlist" 
+            :games="filteredGames" 
+            @edit-game="openModalWithGameInfo($event)" />
     </main>
 </template>
 
@@ -186,7 +187,7 @@ export default {
 }
 
 /**Estilos añadidos */
-.main-grid{
+.main-grid {
     margin-bottom: 5rem;
 }
 </style>
