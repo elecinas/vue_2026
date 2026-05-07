@@ -18,7 +18,7 @@ export default {
 }
 </script>
 <template>
-    <Teleport to="#modal">
+    <Teleport to="#app">
         <dialog class="modal-overlay" @click.self="$emit('close')">
             <div class="modal-content">
                 <header class="modal-header">
