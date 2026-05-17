@@ -30,8 +30,7 @@ export function useGames(){
                 body: JSON.stringify(game)
             })
             if (!res.ok) throw new Error("Error en la petición del servidor");
-            const createdGame = await res.json();
-            games.value.push(createdGame);
+            await getGames();
         } catch(e) {
             error.value = "No se ha podido añadir el juego";
             console.error(e);
@@ -51,8 +50,7 @@ export function useGames(){
                 body: JSON.stringify(game)
             })
             if (!res.ok) throw new Error("Error en la petición del servidor");
-            const updatedGame = await res.json();
-            games.value = games.value.map((g) => g.id === updatedGame.id ? updatedGame : g)
+            await getGames();
         } catch(e) {
             error.value = "No se han podido guardar los datos del juego";
             console.error(e);
@@ -62,15 +60,13 @@ export function useGames(){
     }
 
     const deleteGame = async (id) => {
+        loading.value = true;
         try {
             const res = await fetch("http://localhost:3000/games/" + id, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                method: 'DELETE'
             })
             if (!res.ok) throw new Error("Error en la petición del servidor");
-            games.value = games.value.filter(g => g.id !== id)
+            await getGames();
         } catch(e) {
             error.value = "No se ha podido eliminar el juego";
             console.error(e);
