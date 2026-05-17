@@ -5,7 +5,7 @@ import SearchBox from './components/SearchBox.vue';
 import FilterBar from './components/FilterBar.vue';
 import DialogModal from './components/DialogModal.vue';
 import GameForm from './components/GameForm.vue';
-import { GAMES_DATA } from './data/games';
+import { useGames } from '@/composables/useGames'
 
 export default {
     name: 'App',
@@ -17,11 +17,22 @@ export default {
         DialogModal,
         GameForm
     },
+    setup() {
+        const { games, error, loading, getGames, addGame, updateGame, deleteGame } = useGames();
+        getGames();
+        return {
+            apiGames: games,
+            apiError: error,
+            apiLoading: loading,
+            addGame,
+            updateGame,
+            deleteGame
+        }
+    },
     data() {
         return {
             isModalOpen: false,
             selectedGame: null,
-            games: GAMES_DATA,
             currentOrder: 'asc',
             currentSort: 'popularity',
             currentGenre: 'all',
@@ -31,13 +42,15 @@ export default {
     },
     computed: {
         genresContent() {
-            const rawGenres = this.games.flatMap(game => game.genre.map(name => name.trim().toLowerCase()));
+            if (!this.apiGames) return ['all'];
+            const rawGenres = this.apiGames.flatMap(game => game.genre.map(name => name.trim().toLowerCase()));
             const uniqueGenres = [...new Set(rawGenres)].sort();
 
             return ['all', ...uniqueGenres]
         },
         filteredGames() {
-            let result = [...this.games];
+            if (!this.apiGames) return [];
+            let result = [...this.apiGames];
 
             //filtrado de búsqueda
             if (this.currentSearch) {
@@ -45,7 +58,9 @@ export default {
             }
             //filtrado de genero
             if (this.currentGenre !== 'all') {
-                result = result.filter(game => game.genre.includes(this.currentGenre.toLowerCase()));
+                result = result.filter(game =>
+                    game.genre.map(gameGenre => gameGenre.toLowerCase()).includes(this.currentGenre.toLowerCase())
+                );
             }
             //filtrado de popularidad
             result = result.filter(game => game.popularity >= this.currentPopularity);
@@ -68,15 +83,18 @@ export default {
             this.selectedGame = null;
         },
         add(game) {
-            this.games = [...this.games, game];
+            this.addGame(game);
+            // this.games = [...this.games, game];
             this.closeModal();
         },
         update(updatedGame) {
-            this.games = this.games.map(g => g.id === updatedGame.id ? updatedGame : g);
+            // this.games = this.games.map(g => g.id === updatedGame.id ? updatedGame : g);
+            this.updateGame(updatedGame);
             this.closeModal();
         },
         remove(gameid) {
-            this.games = this.games.filter(g => g.id !== gameid);
+            // this.games = this.games.filter(g => g.id !== gameid);
+            this.deleteGame(gameid)
             this.closeModal();
         },
         openModalWithGameInfo(eventGame) {
@@ -111,6 +129,12 @@ export default {
 
 <template>
     <MainHeader />
+    <div v-if="apiLoading" class="container">
+        <p>Cargando juegos...</p>
+    </div>
+    <div v-else-if="apiError" class="container">
+        <p>{{ apiError }}</p>
+    </div>
     <main class="main-grid container">
         <div class="main-grid__top">
             <SearchBox @search="currentSearch = $event" />
@@ -122,30 +146,17 @@ export default {
                         <h5 style="margin: 0;">{{ selectedGame?.title || "New Game" }}</h5>
                     </template>
                     <template v-slot:body>
-                        <GameForm 
-                            @add-game="add($event)" 
-                            @edit-game="update($event)" 
-                            @delete-game="remove($event)"
+                        <GameForm @add-game="add($event)" @edit-game="update($event)" @delete-game="remove($event)"
                             :current-game="selectedGame" />
                     </template>
                 </DialogModal>
             </div>
         </div>
-        <FilterBar 
-            class="main-grid__filterbar" 
-            :current-order="currentOrder" 
-            :current-genre="currentGenre"
-            :current-sort="currentSort" 
-            :current-popularity="currentPopularity" 
-            :all-genres="genresContent"
-            @select-sort="currentSort = $event" 
-            @select-order="currentOrder = $event"
-            @select-genre="currentGenre = $event" 
-            @select-popularity="currentPopularity = $event" />
-        <CardList 
-            class="main-grid__cardlist" 
-            :games="filteredGames" 
-            @edit-game="openModalWithGameInfo($event)" />
+        <FilterBar class="main-grid__filterbar" :current-order="currentOrder" :current-genre="currentGenre"
+            :current-sort="currentSort" :current-popularity="currentPopularity" :all-genres="genresContent"
+            @select-sort="currentSort = $event" @select-order="currentOrder = $event"
+            @select-genre="currentGenre = $event" @select-popularity="currentPopularity = $event" />
+        <CardList class="main-grid__cardlist" :games="filteredGames" @edit-game="openModalWithGameInfo($event)" />
     </main>
 </template>
 
