@@ -1,115 +1,112 @@
-<script>
-export default {
-    name: "GameForm",
-    data() {
-        return {
-            game: {},
-            errors: [],
+<script setup>
+import { ref, computed, watch } from 'vue';
+
+const game = ref({});
+const errors = ref([]);
+
+const props = defineProps({
+    currentGame: {
+        type: Object,
+        default: null
+    }
+});
+
+watch(
+    () => props.currentGame,
+    (newVal) => {
+        const baseGame = newVal ? { ...newVal } : {};
+
+        game.value = {
+            ...baseGame,
+            title: baseGame.title || "",
+            short_description: baseGame.short_description || "",
+            thumbnail: baseGame.thumbnail || "",
+            developer: baseGame.developer || "",
+            release_date: baseGame.release_date || null,
+            popularity: baseGame.popularity || 0,
+            genre: Array.isArray(baseGame.genre) ? baseGame.genre.join(', ') : "",
+            platform: Array.isArray(baseGame.platform) ? baseGame.platform.join(', ') : ""
         };
     },
-    props: {
-        currentGame: {
-            type: Object,
-            default: null
-        },
-    },
-    // watch para que el estado de la información del juego
-    // en el  formulario esté sincronizado siempre con el padre (App)
-    watch: {
-        currentGame: {
-            handler(newVal) {
-                const baseGame = newVal ? { ...newVal } : {};
+    { immediate: true } // inmediato
+);
 
-                this.game = {
-                    ...baseGame,
-                    title: baseGame.title || "",
-                    short_description: baseGame.short_description || "",
-                    thumbnail: baseGame.thumbnail || "",
-                    developer: baseGame.developer || "",
-                    release_date: baseGame.release_date || null,
-                    popularity: baseGame.popularity || 0,
-                    genre: Array.isArray(baseGame.genre) ? baseGame.genre.join(', ') : "",
-                    platform: Array.isArray(baseGame.platform) ? baseGame.platform.join(', ') : ""
-                };
-            },
-            //como watch solo se activa cuando la variable de la que depende cambia
-            // inmediate: true obliga a ejecutar la funcion al crear el componente
-            immediate: true
-        }
-    },
-    emits: ['add-game', 'edit-game', 'delete-game'],
-    methods: {
-        arrayToString(array) {
-            return array.join(',')
-        },
-        stringToArray(str) {
-            if (typeof str !== 'string' || !str.trim()) return [];
-            return str.split(',').map(item => item.trim()).filter(item => item !== "");
-        },
-        prepareGameData() {
-            return {
-                ...this.game,
-                genre: this.stringToArray(this.game.genre),
-                platform: this.stringToArray(this.game.platform)
-            };
-        },
-        save() {
-            this.errors = [];
+const displayImage = computed(() => {
+    const DEFAULT_IMAGE = 'https://gaming-cdn.com/images/products/13386/orig/hogwarts-legacy-deluxe-edition-deluxe-edition-xbox-series-x-s-xbox-one-juego-microsoft-store-cover.jpg'
+    return game.value.thumbnail ? game.value.thumbnail : DEFAULT_IMAGE
+})
 
-            // Validaciones
-            if (!this.game.title?.trim()) this.errors.push('Please input title');
-            if (!this.game.short_description?.trim()) this.errors.push('Please input short description');
-            if (!this.game.thumbnail?.trim()) this.errors.push('Please input thumbnail URL');
-            if (!this.game.release_date) this.errors.push('Please input release date');
+const emit = defineEmits(['add-game', 'edit-game', 'delete-game']);
 
-            const genreArray = this.stringToArray(this.game.genre);
-            if (genreArray.length === 0) this.errors.push('Please input at least one genre');
-
-            // Si errores se sale
-            if (this.errors.length > 0) return;
-
-            const finalData = this.prepareGameData();
-
-            if (this.currentGame?.id) {
-                this.$emit('edit-game', finalData);
-            } else {
-                finalData.id = window.crypto.randomUUID();
-                this.$emit('add-game', finalData);
-            }
-
-            this.resetForm();
-        },
-        resetForm() {
-            this.game = {
-                id: "",
-                title: "",
-                thumbnail: "",
-                short_description: "",
-                genre: "",
-                platform: "",
-                developer: "",
-                release_date: null,
-                popularity: 0,
-            };
-            this.errors = [];
-        },
-        deleteGame() {
-            if (this.game?.id) {
-                if (confirm('Are you sure you want to delete this game?')) {
-                    this.$emit('delete-game', this.game.id);
-                }
-            } else {
-                this.$emit('delete-game');
-            }
-        },
-    },
-    computed: {
-        displayImage() {
-            const DEFAULT_IMAGE = 'https://gaming-cdn.com/images/products/13386/orig/hogwarts-legacy-deluxe-edition-deluxe-edition-xbox-series-x-s-xbox-one-juego-microsoft-store-cover.jpg'
-            return this.game.thumbnail ? this.game.thumbnail : DEFAULT_IMAGE
-        }
-    },
+const arrayToString = (array) => {
+    return array.join(',')
 };
+
+const stringToArray = (str) => {
+    if (typeof str !== 'string' || !str.trim()) return [];
+    return str.split(',').map(item => item.trim()).filter(item => item !== "");
+};
+
+const prepareGameData = () => {
+    return {
+        ...game.value,
+        genre: stringToArray(game.value.genre),
+        platform: stringToArray(game.value.platform)
+    };
+}
+
+const resetForm = () => {
+    game.value = {
+        id: "",
+        title: "",
+        thumbnail: "",
+        short_description: "",
+        genre: "",
+        platform: "",
+        developer: "",
+        release_date: null,
+        popularity: 0,
+    };
+    errors.value = [];
+};
+
+const save = () => {
+    errors.value = [];
+
+    // Validaciones
+    if (!game.value.title?.trim()) errors.value.push('Please input title');
+    if (!game.value.short_description?.trim()) errors.value.push('Please input short description');
+    if (!game.value.thumbnail?.trim()) errors.value.push('Please input thumbnail URL');
+    if (!game.value.release_date) errors.value.push('Please input release date');
+
+    const genreArray = stringToArray(game.value.genre);
+    if (genreArray.length === 0) errors.value.push('Please input at least one genre');
+
+    // Si errores se sale
+    if (errors.value.length > 0) return;
+
+    const finalData = prepareGameData();
+
+    if (props.currentGame?.id) {
+        emit('edit-game', finalData);
+    } else {
+        finalData.id = window.crypto.randomUUID();
+        emit('add-game', finalData);
+    }
+
+    resetForm();
+}
+
+const deleteGame = () => {
+    if (game.value?.id) {
+        if (confirm('Are you sure you want to delete this game?')) {
+            emit('delete-game', game.value.id);
+        }
+    } else {
+        emit('delete-game');
+    }
+};
+
 </script>
 
 <template>

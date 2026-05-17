@@ -1,21 +1,14 @@
-<script>
+<script setup>
 import GameCard from './GameCard.vue';
 
-export default {
-    name: 'CardList',
-    components: {
-        GameCard
-    },
-    props: {
+const props = defineProps({
         games: {
             type: Array,
-            required: true,
-            default: () => []
+            required: true
         }
-    },
-    emits: ['edit-game'],
-    methods: {}
-}
+    });
+
+defineEmits(['edit-game']);
 </script>
 
 <template>

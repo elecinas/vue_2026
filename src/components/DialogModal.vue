@@ -1,21 +1,21 @@
-<script>
-export default {
-    name: 'DialogModal',
-    emits: ['close'],
-    mounted(){
-        document.body.style.overflow = 'hidden';
-        window.addEventListener('keydown', this.handleEsc);
-    },
-    unmounted(){
-        document.body.style.overflow = '';
-        window.removeEventListener('keydown', this.handleEsc);
-    },
-    methods: {
-        handleEsc(e){
-            if(e.key === 'Escape') this.$emit('close');
-        }
-    }
+<script setup>
+import { onMounted, onUnmounted } from 'vue';
+
+const emit = defineEmits(['close']);
+
+const handleEsc = (e) => {
+    if(e.key === 'Escape') emit('close');
 }
+
+onMounted(() => {
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleEsc);
+});
+
+onUnmounted(() => {
+    document.body.style.overflow = '';
+    window.removeEventListener('keydown', handleEsc);
+});
 </script>
 <template>
     <Teleport to="#app">

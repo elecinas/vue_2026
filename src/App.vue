@@ -1,129 +1,110 @@
-<script>
+<script setup>
+import { ref, computed } from 'vue';
 import MainHeader from './components/MainHeader.vue';
 import CardList from './components/CardList.vue';
 import SearchBox from './components/SearchBox.vue';
 import FilterBar from './components/FilterBar.vue';
 import DialogModal from './components/DialogModal.vue';
 import GameForm from './components/GameForm.vue';
-import { useGames } from '@/composables/useGames'
+import { useGames } from '@/composables/useGames';
 
-export default {
-    name: 'App',
-    components: {
-        MainHeader,
-        SearchBox,
-        FilterBar,
-        CardList,
-        DialogModal,
-        GameForm
-    },
-    setup() {
-        const { games, error, loading, getGames, addGame, updateGame, deleteGame } = useGames();
-        getGames();
-        return {
-            apiGames: games,
-            apiError: error,
-            apiLoading: loading,
-            addGame,
-            updateGame,
-            deleteGame
-        }
-    },
-    data() {
-        return {
-            isModalOpen: false,
-            selectedGame: null,
-            currentOrder: 'asc',
-            currentSort: 'popularity',
-            currentGenre: 'all',
-            currentPopularity: 0,
-            currentSearch: '',
-        }
-    },
-    computed: {
-        genresContent() {
-            if (!this.apiGames) return ['all'];
-            const rawGenres = this.apiGames.flatMap(game => game.genre.map(name => name.trim().toLowerCase()));
-            const uniqueGenres = [...new Set(rawGenres)].sort();
+const { games: apiGames, error: apiError, loading: apiLoading, getGames, addGame, updateGame, deleteGame } = useGames();
 
-            return ['all', ...uniqueGenres]
-        },
-        filteredGames() {
-            if (!this.apiGames) return [];
-            let result = [...this.apiGames];
+getGames();
 
-            //filtrado de búsqueda
-            if (this.currentSearch) {
-                result = result.filter(game => this.filterSearchCondition(game, this.currentSearch));
-            }
-            //filtrado de genero
-            if (this.currentGenre !== 'all') {
-                result = result.filter(game =>
-                    game.genre.map(gameGenre => gameGenre.toLowerCase()).includes(this.currentGenre.toLowerCase())
-                );
-            }
-            //filtrado de popularidad
-            result = result.filter(game => game.popularity >= this.currentPopularity);
-            //ordenacion
-            const modifier = this.currentOrder === 'asc' ? 1 : -1;
+const isModalOpen = ref(false);
+const selectedGame = ref(null);
+const currentOrder = ref('asc');
+const currentSort = ref('popularity');
+const currentGenre = ref('all');
+const currentPopularity = ref(0);
+const currentSearch = ref('');
 
-            result.sort((a, b) => {
-                if (this.currentSort === 'alphabetical') return a.title.localeCompare(b.title) * modifier;
-                if (this.currentSort === 'release') return a.release_date.localeCompare(b.release_date) * modifier;
-                if (this.currentSort === 'popularity') return (a.popularity - b.popularity) * modifier;
-                return 0;
-            });
+const genresContent = computed(() => {
+    if (!apiGames.value) return ['all'];
+    const rawGenres = apiGames.value.flatMap(game => game.genre.map(name => name.trim().toLowerCase()));
+    const uniqueGenres = [...new Set(rawGenres)].sort();
 
-            return result;
-        }
-    },
-    methods: {
-        closeModal() {
-            this.isModalOpen = false;
-            this.selectedGame = null;
-        },
-        add(game) {
-            this.addGame(game);
-            // this.games = [...this.games, game];
-            this.closeModal();
-        },
-        update(updatedGame) {
-            // this.games = this.games.map(g => g.id === updatedGame.id ? updatedGame : g);
-            this.updateGame(updatedGame);
-            this.closeModal();
-        },
-        remove(gameid) {
-            // this.games = this.games.filter(g => g.id !== gameid);
-            this.deleteGame(gameid)
-            this.closeModal();
-        },
-        openModalWithGameInfo(eventGame) {
-            this.selectedGame = { ...eventGame };
-            this.isModalOpen = true;
-        },
-        openModalWithoutGameInfo() {
-            this.isModalOpen = true
-            this.selectedGame = null
-        },
-        resetFilters() {
-            this.currentOrder = 'asc'
-            this.currentSort = 'popularity'
-            this.currentGenre = 'all'
-            this.currentPopularity = 0,
-                this.currentSearch = ''
-        },
-        filterSearchCondition(game, searchContent) {
-            const str = searchContent.toLowerCase();
-            const g = { ...game }
-            let result;
-            result = (g.title.toLowerCase().includes(str)) ||
-                (g.short_description.toLowerCase().includes(str)) ||
-                (g.developer.toLowerCase().includes(str)) ||
-                (g.genre.join(' ').toLowerCase().includes(str)) ||
-                (g.platform.join(' ').toLowerCase().includes(str))
-            return result
-        },
+    return ['all', ...uniqueGenres]
+});
+
+const filteredGames = computed(() => {
+    if (!apiGames.value || !apiGames.value.length) return [];
+    let result = [...apiGames.value];
+
+    //filtrado de búsqueda
+    if (currentSearch.value) {
+        result = result.filter(game => filterSearchCondition(game, currentSearch.value));
     }
+    //filtrado de genero
+    if (currentGenre.value !== 'all') {
+        result = result.filter(game =>
+            game.genre.map(gameGenre => gameGenre.toLowerCase()).includes(currentGenre.value.toLowerCase())
+        );
+    }
+    //filtrado de popularidad
+    result = result.filter(game => game.popularity >= currentPopularity.value);
+    //ordenacion
+    const modifier = currentOrder.value === 'asc' ? 1 : -1;
+
+    result.sort((a, b) => {
+        if (currentSort.value === 'alphabetical') return a.title.localeCompare(b.title) * modifier;
+        if (currentSort.value === 'release') return a.release_date.localeCompare(b.release_date) * modifier;
+        if (currentSort.value === 'popularity') return (a.popularity - b.popularity) * modifier;
+        return 0;
+    });
+
+    return result;
+});
+
+const closeModal = () => {
+    isModalOpen.value = false;
+    selectedGame.value = null;
+};
+
+const add = (game) => {
+    addGame(game);
+    closeModal();
+};
+
+const update = (updatedGame) => {
+    updateGame(updatedGame);
+    closeModal();
+};
+
+const remove = (gameid) => {
+    deleteGame(gameid);
+    closeModal();
+}
+
+const openModalWithGameInfo = (eventGame) => {
+    selectedGame.value = { ...eventGame };
+    isModalOpen.value = true;
+};
+
+const openModalWithoutGameInfo = () => {
+    isModalOpen.value = true;
+    selectedGame.value = null;
+};
+
+const resetFilters = () => {
+    currentOrder.value = 'asc';
+    currentSort.value = 'popularity';
+    currentGenre.value = 'all';
+    currentPopularity.value = 0;
+    currentSearch.value = '';
+};
+
+const filterSearchCondition = (game, searchContent) => {
+    const str = searchContent.toLowerCase();
+    const g = { ...game }
+    let result;
+    result = (g.title.toLowerCase().includes(str)) ||
+        (g.short_description.toLowerCase().includes(str)) ||
+        (g.developer.toLowerCase().includes(str)) ||
+        (g.genre.join(' ').toLowerCase().includes(str)) ||
+        (g.platform.join(' ').toLowerCase().includes(str))
+    return result
 }
 </script>
 

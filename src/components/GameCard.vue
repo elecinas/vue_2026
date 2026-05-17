@@ -1,38 +1,33 @@
-<script>
-export default {
-  name: "GameCard",
-  props: {
-    game: {
-      type: Object,
-      required: true,
-    },
+<script setup>
+import { computed } from 'vue';
+
+const props = defineProps({
+  game: {
+    type: Object,
+    required: true,
   },
-  emits: ['select-game'],
-  methods: {
-    sendGame(selectedG) {
-      this.$emit('select-game', selectedG)
-    },
-    formatHuman(date) {
-      const options = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      };
-      return new Date(date).toLocaleDateString('en-US', options);
-    }
-  },
-  computed: {
-    displayGenres() {
-      return this.game.genre.slice(0, 2);
-    },
-  },
-};
+});
+
+const emit = defineEmits(['select-game']);
+
+const formatHuman = (date) => {
+  const options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  };
+  return new Date(date).toLocaleDateString('en-US', options);
+}
+
+const displayGenres = computed(() => {
+  return props.game.genre.slice(0, 2);
+})
 </script>
 
 <template>
-  <div class="card card__changes" @click="sendGame(game)">
+  <div class="card card__changes" @click="emit('select-game', game)">
     <div class="card__image__container">
-      <img class="card__image card__image__changes" :src="game.thumbnail" :alt="game.title" loading="lazy"/>
+      <img class="card__image card__image__changes" :src="game.thumbnail" :alt="game.title" loading="lazy" />
     </div>
 
     <div class="card__content">

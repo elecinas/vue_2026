@@ -1,13 +1,6 @@
-<script>
-export default {
-    name: "SearchBox",
-    emits: ['search'],
-    methods: {
-        handleInput(event) {
-            this.$emit('search', event.target.value.trim());
-        }
-    }
-}
+<script setup>
+const emit = defineEmits(['search']);
+const handleInput = (event) => emit('search', event.target.value.trim());
 </script>
 
 <template>

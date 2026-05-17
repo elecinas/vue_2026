@@ -1,28 +1,23 @@
-<script>
+<script setup>
 import { SORT_OPTIONS, ORDER_OPTIONS } from '@/data/filterOptions';
 
-export default {
-    name: "FilterBar",
-    created(){
-        this.SORT_OPTIONS = SORT_OPTIONS,
-        this.ORDER_OPTIONS = ORDER_OPTIONS
-    },
-    props: {
-        currentSort: String,
-        currentOrder: String,
-        currentGenre: String,
-        currentPopularity: Number,
-        allGenres: Array,
-    },
-    emits: ['select-sort', 'select-order', 'select-genre', 'select-popularity']
-}
+const props = defineProps({
+    currentSort: String,
+    currentOrder: String,
+    currentGenre: String,
+    currentPopularity: Number,
+    allGenres: Array,
+});
+
+const emit = defineEmits(['select-sort', 'select-order', 'select-genre', 'select-popularity']);
 </script>
 
 <template>
     <div class="filter">
         <div class="filter__field">
             <label for="sort" class="filter__label">Sort By:</label>
-            <select :value="currentSort" @change="$emit('select-sort', $event.target.value)"name="sort-selection" id="sort" class="filter__select">
+            <select :value="currentSort" @change="emit('select-sort', $event.target.value)" name="sort-selection"
+                id="sort" class="filter__select">
                 <option v-for="option in SORT_OPTIONS" :key="option.id" :value="option.value">
                     {{ option.label }}
                 </option>
@@ -30,7 +25,8 @@ export default {
         </div>
         <div class="filter__field">
             <label for="order" class="filter__label">Order By:</label>
-            <select :value="currentOrder" @change="$emit('select-order', $event.target.value)" name="order-selection" id="order" class="filter__select">
+            <select :value="currentOrder" @change="emit('select-order', $event.target.value)" name="order-selection"
+                id="order" class="filter__select">
                 <option v-for="option in ORDER_OPTIONS" :key="option.id" :value="option.value">
                     {{ option.label }}
                 </option>
@@ -38,7 +34,8 @@ export default {
         </div>
         <div class="filter__field">
             <label for="genre" class="filter__label">Genre:</label>
-            <select :value="currentGenre" @change="$emit('select-genre', $event.target.value)" name="genre-selection" id="genre" class="filter__select">
+            <select :value="currentGenre" @change="emit('select-genre', $event.target.value)" name="genre-selection"
+                id="genre" class="filter__select">
                 <option v-for="genre in allGenres" :key="genre" :value="genre">
                     {{ genre }}
                 </option>
@@ -46,8 +43,8 @@ export default {
         </div>
         <div class="filter__field">
             <label for="popularity" class="filter__label">Popularity:</label>
-            <input :value="currentPopularity" @change="$emit('select-popularity', Number($event.target.value))" type="range" id="popularity" name="popularity" min="0" max="5"
-                class="filter__range">
+            <input :value="currentPopularity" @change="emit('select-popularity', Number($event.target.value))"
+                type="range" id="popularity" name="popularity" min="0" max="5" class="filter__range">
             <span class="filter__range-value">{{ currentPopularity }}</span>
         </div>
     </div>

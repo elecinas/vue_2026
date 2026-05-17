@@ -1,20 +1,11 @@
-<script>
-export default {
-    name: 'MainHeader',
-    data() {
-        return {
-            name: 'Esther Lecina'
-        }
-    }
-}
-</script>
+
 <template>
     <header class="header">
         <picture class="header__logo">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Small_logo_UOC.svg/1280px-Small_logo_UOC.svg.png"
                 alt="UOC Logo" width="60">
         </picture>
-        <h1 class="header__title">Game database: {{ name }}</h1>
+        <h1 class="header__title">Game database: Esther Lecina</h1>
     </header>
 </template>
 
